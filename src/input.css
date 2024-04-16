@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.product-card {
+  flex-basis: calc(100% / 6 - 20px); /* Adjust width for 6 cards per row */
+  margin: 10px; /* Adjust margin between cards */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-card img {
+  max-width: 100%; /* Ensure image fits within the card */
+  height: auto; /* Prevent distortion of image aspect ratio */
+  object-fit: cover; /* Cover the entire area of the card */
+  aspect-ratio: 1; /* Maintain aspect ratio of 1:1 for square images */
+}
