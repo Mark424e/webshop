@@ -52,8 +52,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $category = trim($_POST["category"]);
     }
 
-    if (empty(trim($_POST["subcategory"]))) {
-        $subcategory_err = "Please select the product subcategory.";
+    // Check if subcategory is selected
+    if (!empty($_POST["subcategory"])) {
+        $subcategory_err = "Please enter the product subcategory.";
     } else {
         $subcategory = trim($_POST["subcategory"]);
     }
@@ -76,14 +77,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Check if all fields are valid
-    if (empty($name_err) && empty($price_err) && empty($description_err) && empty($category_err) && empty($subcategory_err) && empty($image_url_err)) {
+    if (empty($name_err) && empty($price_err) && empty($description_err) && empty($category_err) && empty($image_url_err)) {
         // Prepare SQL statement for inserting data into products table
         $sql = "INSERT INTO products (name, price, description, category, subcategory, image_url) VALUES (?, ?, ?, ?, ?, ?)";
         
         if ($stmt = $conn->prepare($sql)) {
             // Bind parameters to the prepared statement
-            $stmt->bind_param("ssssss", $name, $price, $description, $category, $subcategory, $image_url);
+            $stmt->bind_param("sissss", $name, $price, $description, $category, $subcategory, $image_url);
 
+            // Set parameters
+            $name = $_POST["name"];
+            $price = $_POST["price"];
+            $description = $_POST["description"];
+            $category = $_POST["category"];
+            $image_url = "assets/uploads/" . $image_filename; // Assuming $image_filename is defined earlier
+            
             // Attempt to execute the prepared statement
             if ($stmt->execute()) {
                 // Redirect to admin page after successful insertion
@@ -133,17 +141,10 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-gray-800 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-white text-2xl">WebShop Admin</h1>
-            <div>
-                <a href="index.php" class="text-white mx-2">Home</a>
-                <a href="logout.php" class="text-white mx-2">Logout</a>
-            </div>
-        </div>
-    </nav>
 
-    <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-md">
+    <?php include 'header.php'; ?>
+
+    <div class="max-w-md mx-auto p-6 bg-white rounded shadow-md">
         <h2 class="text-2xl font-semibold mb-6">Add Product</h2>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
             <div class="mb-4">
@@ -190,20 +191,22 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         <h2 class="text-2xl font-semibold mb-6">Manage Products</h2>
         <div class="grid grid-cols-3 gap-6">
             <?php foreach ($products as $product): ?>
-                <div class="border p-4 rounded shadow-md product-card">
+                <div class="bg-white border p-4 rounded shadow-md product-card">
                     <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="mb-4">
                     <div>
                         <h3 class="text-lg font-semibold"><?php echo $product['name']; ?></h3>
                         <p class="text-gray-600 mb-2">$<?php echo $product['price']; ?></p>
                     </div>
-                    <div>
-                        <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Edit</a>
-                        <a href="admin.php?id=<?php echo $product['id']; ?>" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                    <div class="flex justify-center">
+                        <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 w-20 text-center">Edit</a>
+                        <a href="admin.php?id=<?php echo $product['id']; ?>" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-20 text-center" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
+
+    <?php include 'footer.php'; ?>
 
     <script>
         document.getElementById('category').addEventListener('change', function() {
@@ -222,11 +225,11 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             subcategoryDropdown.innerHTML = '';
             var defaultOption = document.createElement('option');
             defaultOption.text = 'Select Subcategory';
-            defaultOption.value = '';
+            defaultOption.value = 'none';
             subcategoryDropdown.appendChild(defaultOption);
 
             if (category === 'clothes') {
-                var clothesSubcategories = ['t-shirts', 'hoodies'];
+                var clothesSubcategories = ['t-shirt', 'hoodie'];
                 clothesSubcategories.forEach(function(subcategory) {
                     var option = document.createElement('option');
                     option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1); // Capitalize first letter
@@ -234,7 +237,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                     subcategoryDropdown.appendChild(option);
                 });
             } else if (category === 'jewellery') {
-                var jewellerySubcategories = ['necklaces', 'bracelets'];
+                var jewellerySubcategories = ['necklace', 'bracelet'];
                 jewellerySubcategories.forEach(function(subcategory) {
                     var option = document.createElement('option');
                     option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1); // Capitalize first letter
