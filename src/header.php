@@ -3,7 +3,7 @@
 <header class="bg-gray-800 p-4 mb-16">
   <nav>
     <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-white text-2xl">WebShop</h1>
+      <h1 class="text-white text-2xl"><a href="./">Fishsticks</a></h1>
       <div>
       <a href="index.php" class="text-white mx-2">Home</a>
         <?php if (isset($_SESSION['email'])): ?>

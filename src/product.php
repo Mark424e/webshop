@@ -42,25 +42,11 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $product['name']; ?> - Product Details</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="./output.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-gray-800 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-white text-2xl">WebShop</h1>
-            <div>
-                <a href="index.php" class="text-white mx-2">Home</a>
-                <?php if (isset($_SESSION['email'])): ?>
-                    <a href="logout.php" class="text-white mx-2">Logout</a>
-                <?php else: ?>
-                    <a href="login.php" class="text-white mx-2">Login</a>
-                    <a href="register.php" class="text-white mx-2">Register</a>
-                <?php endif; ?>
-                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <a href="admin.php" class="text-white mx-2">Admin</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </nav>
+
+    <?php include 'header.php'; ?>
 
     <div class="container mx-auto mt-10">
         <div class="border p-4 rounded shadow-md">
@@ -70,5 +56,8 @@ $conn->close();
             <p class="text-gray-700"><?php echo $product['description']; ?></p>
         </div>
     </div>
+
+    <?php include 'footer.php'; ?>
+
 </body>
 </html>

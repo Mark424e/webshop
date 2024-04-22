@@ -2,87 +2,89 @@
 session_start();
 require_once 'config.php';
 
-// Fetch categories and subcategories from the database
-$sql = "SELECT DISTINCT category, subcategory FROM products";
-$result = $conn->query($sql);
+// Fetch distinct categories from the products table
+$query_categories = "SELECT DISTINCT category FROM products";
+$result_categories = mysqli_query($conn, $query_categories);
 
-$categories = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $category = $row['category'];
-        $subcategory = $row['subcategory'];
-        if (!isset($categories[$category])) {
-            $categories[$category] = [];
-        }
-        if (!in_array($subcategory, $categories[$category])) {
-            $categories[$category][] = $subcategory;
-        }
+// Fetch distinct subcategories from the products table
+$query_subcategories = "SELECT DISTINCT subcategory FROM products";
+$result_subcategories = mysqli_query($conn, $query_subcategories);
+
+// Function to fetch products based on category and/or subcategory
+function fetchProducts($conn, $category = null, $subcategory = null) {
+    $query = "SELECT * FROM products";
+    if ($category && $subcategory) {
+        $query .= " WHERE category='$category' AND subcategory='$subcategory'";
+    } elseif ($category) {
+        $query .= " WHERE category='$category'";
+    } elseif ($subcategory) {
+        $query .= " WHERE subcategory='$subcategory'";
     }
+    $result = mysqli_query($conn, $query);
+    return $result;
 }
 
-// Fetch products from the database
-$sql = "SELECT * FROM products";
-$result = $conn->query($sql);
-
-$products = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $products[] = $row;
-    }
-}
+// Fetch products based on URL parameters
+$category = $_GET['category'] ?? null;
+$subcategory = $_GET['subcategory'] ?? null;
+$result_products = fetchProducts($conn, $category, $subcategory);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products</title>
+    <title>Dynamic Nested Menu</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="./output.css" rel="stylesheet">
 </head>
+
+<?php include 'header.php'; ?>
+
 <body class="bg-gray-100">
-
-    <?php include 'header.php'; ?>
-
-    <!-- Main Content -->
-    <div class="container mx-auto my-8">
-        <h2 class="text-2xl font-semibold mb-6">Products</h2>
-
-        <!-- Categories and Subcategories Menu -->
-        <nav class="mb-6">
-            <ul class="space-y-2">
-                <?php foreach ($categories as $category => $subcategories): ?>
-                    <li class="py-2">
-                        <a href="#" class="text-blue-500 hover:underline"><?php echo $category; ?></a>
-                        <?php if (!empty($subcategories)): ?>
-                            <ul class="ml-4 space-y-2">
-                                <?php foreach ($subcategories as $subcategory): ?>
-                                    <li class="py-2">
-                                        <a href="#" class="text-gray-600 hover:underline"><?php echo $subcategory; ?></a>
-                                    </li>
-                                <?php endforeach; ?>
+    <div class="container mx-auto p-4">
+        <div class="grid grid-cols-3 gap-4">
+            <div class="col-span-1">
+                <h2 class="text-lg font-bold mb-2">Categories</h2>
+                <ul class="space-y-2">
+                    <?php while ($row = mysqli_fetch_assoc($result_categories)) : ?>
+                        <li>
+                            <a href="?category=<?php echo $row['category']; ?>" class="text-blue-500 hover:underline"><?php echo $row['category']; ?></a>
+                            <ul class="pl-4">
+                                <?php
+                                // Fetch subcategories for each category
+                                $category = $row['category'];
+                                $query_subcategories = "SELECT DISTINCT subcategory FROM products WHERE category='$category'";
+                                $result_subcategories = mysqli_query($conn, $query_subcategories);
+                                while ($subcat_row = mysqli_fetch_assoc($result_subcategories)) :
+                                ?>
+                                    <li><a href="?category=<?php echo $row['category']; ?>&subcategory=<?php echo $subcat_row['subcategory']; ?>" class="text-gray-500 hover:underline"><?php echo $subcat_row['subcategory']; ?></a></li>
+                                <?php endwhile; ?>
                             </ul>
-                        <?php endif; ?>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </nav>
-
-        <!-- Product Display Grid -->
-        <div class="grid grid-cols-4 gap-8">
-            <?php foreach ($products as $product): ?>
-                <a href="product.php?id=<?php echo $product['id']; ?>" class="bg-white border p-4 rounded shadow-md product-card">
-                    <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="mb-4">
-                    <div>
-                        <h3 class="text-lg font-semibold"><?php echo $product['name']; ?></h3>
-                        <p class="text-gray-600 mb-2">$<?php echo $product['price']; ?></p>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+                        </li>
+                    <?php endwhile; ?>
+                </ul>
+            </div>
+            <div class="col-span-2">
+                <h2 class="text-lg font-bold mb-2">Products</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <?php while ($product = mysqli_fetch_assoc($result_products)) : ?>
+                        <div class="flex flex-col justify-between border rounded p-4">
+                            <h3 class="text-lg font-semibold"><?php echo $product['name']; ?></h3>
+                            <div>
+                                <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="mt-2">
+                                <p class="text-gray-700 font-semibold">$<?php echo $product['price']; ?></p>
+                            </div>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+            </div>
         </div>
     </div>
-
-    <?php include 'footer.php'; ?>
-
 </body>
+
+<?php include 'footer.php'; ?>
+
 </html>
