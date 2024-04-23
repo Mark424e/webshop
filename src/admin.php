@@ -2,30 +2,23 @@
 session_start();
 require_once 'config.php';
 
-// Check if the user is logged in and is an admin
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
-    // Redirect non-admin users to a restricted area message page
     header("Location: restricted.php");
     exit();
 }
 
-// Retrieve products from the database
 $sql = "SELECT * FROM products";
 $result = $conn->query($sql);
 
-// Check if there are products in the database
 if ($result->num_rows > 0) {
-    // Fetch products as associative array
     $products = $result->fetch_all(MYSQLI_ASSOC);
 } else {
-    $products = []; // Initialize empty array if no products found
+    $products = [];
 }
 
-// Initialize variables for form submission
 $name = $price = $description = $category = $image_url = "";
 $name_err = $price_err = $description_err = $category_err = $image_url_err = "";
 
-// Process form submission & Validators
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty(trim($_POST["name"]))) {
@@ -61,43 +54,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $file_info = pathinfo($_FILES["image"]["name"]);
         $file_extension = strtolower($file_info['extension']);
         if (in_array($file_extension, $allowed_types)) {
-            // Generate a unique filename to prevent overwriting existing files
             $image_filename = uniqid() . '.' . $file_extension;
-            // Move the uploaded file to a designated folder
             move_uploaded_file($_FILES["image"]["tmp_name"], "assets/uploads/" . $image_filename);
-            // Set the image URL to the path of the uploaded file
             $image_url = "assets/uploads/" . $image_filename;
         } else {
             $image_url_err = "Please upload a valid image file (jpg, jpeg, png, gif).";
         }
     }
 
-    // Check if all fields are valid
     if (empty($name_err) && empty($price_err) && empty($description_err) && empty($category_err) && empty($image_url_err)) {
-        // Prepare SQL statement for inserting data into products table
         $sql = "INSERT INTO products (name, price, description, category, subcategory, image_url) VALUES (?, ?, ?, ?, ?, ?)";
         
         if ($stmt = $conn->prepare($sql)) {
-            // Bind parameters to the prepared statement
             $stmt->bind_param("sissss", $name, $price, $description, $category, $subcategory, $image_url);
 
-            // Set parameters
             $name = $_POST["name"];
             $price = $_POST["price"];
             $description = $_POST["description"];
             $category = $_POST["category"];
-            $image_url = "assets/uploads/" . $image_filename; // Assuming $image_filename is defined earlier
+            $image_url = "assets/uploads/" . $image_filename;
             
-            // Attempt to execute the prepared statement
             if ($stmt->execute()) {
-                // Redirect to admin page after successful insertion
                 header("Location: admin.php");
                 exit();
             } else {
                 echo "Something went wrong. Please try again later.";
             }
 
-            // Close statement
             $stmt->close();
         }
     }
@@ -106,35 +89,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $product_id = $_GET['id'];
 
-    // Prepare SQL statement to delete product from the database
     $sql = "DELETE FROM products WHERE id = ?";
     if ($stmt = $conn->prepare($sql)) {
-        // Bind product ID parameter
         $stmt->bind_param("i", $product_id);
         
-        // Execute the statement
         if ($stmt->execute()) {
-            // Redirect back to admin page after successful deletion
             header("Location: admin.php");
             exit();
         } else {
             echo "Error: Unable to delete the product.";
         }
 
-        // Close statement
         $stmt->close();
     }
 }
 
-// Fetch distinct categories from the products table
 $query_categories = "SELECT DISTINCT category FROM products";
 $result_categories = mysqli_query($conn, $query_categories);
 
-// Fetch distinct subcategories from the products table
 $query_subcategories = "SELECT DISTINCT subcategory FROM products";
 $result_subcategories = mysqli_query($conn, $query_subcategories);
 
-// Function to fetch products based on category and/or subcategory
 function fetchProducts($conn, $category = null, $subcategory = null) {
     $query = "SELECT * FROM products";
     if ($category && $subcategory) {
@@ -148,7 +123,6 @@ function fetchProducts($conn, $category = null, $subcategory = null) {
     return $result;
 }
 
-// Fetch products based on URL parameters
 $category = $_GET['category'] ?? null;
 $subcategory = $_GET['subcategory'] ?? null;
 $result_products = fetchProducts($conn, $category, $subcategory);
@@ -200,7 +174,6 @@ $result_products = fetchProducts($conn, $category, $subcategory);
                 <label for="subcategory" class="block text-gray-700 font-bold mb-2">Subcategory:</label>
                 <select id="subcategory" name="subcategory" class="border rounded w-full py-2 px-3 mb-3">
                     <option value="">Select Subcategory</option>
-                    <!-- Options will be populated dynamically via JavaScript -->
                 </select>
             </div>
 
@@ -234,7 +207,7 @@ $result_products = fetchProducts($conn, $category, $subcategory);
 
     <?php include 'footer.php'; ?>
 
-<script src="dropdown.js"></script>
+<script src="script.js"></script>
 <script>
         // JavaScript code to dynamically populate subcategory dropdown based on selected category
         document.getElementById('category').addEventListener('change', function() {
@@ -274,7 +247,6 @@ $result_products = fetchProducts($conn, $category, $subcategory);
                     subcategoryDropdown.appendChild(option);
                 });
             }
-            // Add more conditions for other categories if needed
         });
     </script>
 </body>

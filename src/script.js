@@ -1,3 +1,4 @@
+// Dropdown
 document.addEventListener('click', function (event) {
   var isClickInside = document.getElementById('dropdown').contains(event.target);
   if (!isClickInside) {

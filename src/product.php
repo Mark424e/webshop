@@ -2,11 +2,9 @@
 session_start();
 require_once 'config.php';
 
-// Check if product ID is provided in the URL
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $product_id = $_GET['id'];
 
-    // Retrieve product details from the database
     $sql = "SELECT * FROM products WHERE id = ?";
     if ($stmt = $conn->prepare($sql)) {
         $stmt->bind_param("i", $product_id);

@@ -7,14 +7,12 @@
         <h1 class="text-white text-2xl"><a href="./">Fishsticks</a></h1>
       
         <div class="relative">
-          <!-- Dropdown button -->
           <button id="dropdown" class=" text-white py-2 px-4 rounded inline-flex items-center">
             <span>Products</span>
             <svg class="fill-current w-4 h-4 ml-2" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 14l-7-7h14l-7 7z"/>
             </svg>
           </button>
-          <!-- Dropdown content -->
           <div id="dropdown-content" class="absolute left-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 hidden">
             <ul>
               <?php while ($row = mysqli_fetch_assoc($result_categories)) : ?>
@@ -22,7 +20,6 @@
                 <a href="?category=<?php echo $row['category']; ?>" class="pl-4 hover:underline"><?php echo $row['category']; ?></a>
                   <ul class="bg-white pl-4">
                     <?php
-                    // Fetch subcategories for each category
                     $category = $row['category'];
                     $query_subcategories = "SELECT DISTINCT subcategory FROM products WHERE category='$category'";
                     $result_subcategories = mysqli_query($conn, $query_subcategories);

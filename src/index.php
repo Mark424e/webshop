@@ -2,15 +2,35 @@
 session_start();
 require_once 'config.php';
 
-// Fetch distinct categories from the products table
 $query_categories = "SELECT DISTINCT category FROM products";
 $result_categories = mysqli_query($conn, $query_categories);
-
-// Fetch distinct subcategories from the products table
 $query_subcategories = "SELECT DISTINCT subcategory FROM products";
 $result_subcategories = mysqli_query($conn, $query_subcategories);
 
-// Function to fetch products based on category and/or subcategory
+function addToCart($conn, $productId) {
+    $sql = "INSERT INTO cart (product_id) VALUES (?)";
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("i", $productId);
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_to_cart']) && isset($_POST['product_id'])) {
+    $product_id = $_POST['product_id'];
+
+    if (addToCart($conn, $product_id)) {
+        echo "<script>alert('Product added to cart!');</script>";
+    } else {
+        echo "<script>alert('Error adding product to cart.');</script>";
+    }
+}
+
 function fetchProducts($conn, $category = null, $subcategory = null) {
     $query = "SELECT * FROM products";
     if ($category && $subcategory) {
@@ -24,7 +44,6 @@ function fetchProducts($conn, $category = null, $subcategory = null) {
     return $result;
 }
 
-// Fetch products based on URL parameters
 $category = $_GET['category'] ?? null;
 $subcategory = $_GET['subcategory'] ?? null;
 $result_products = fetchProducts($conn, $category, $subcategory);
@@ -44,6 +63,8 @@ $result_products = fetchProducts($conn, $category, $subcategory);
 <body class="bg-gray-100">
     
     <?php include 'header.php'; ?>
+
+    <div id="toast" class="hidden">Product added to cart!</div>
 
     <div id="hero" class="bg-cover bg-center py-40 mb-16">
         <div class="container mx-auto px-4 mt-20">
@@ -65,6 +86,12 @@ $result_products = fetchProducts($conn, $category, $subcategory);
                         <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="my-4">
                         <p class="text-gray-700 font-semibold">$<?php echo $product['price']; ?></p>
                     </div>
+                    <div class="flex justify-center">
+                        <form method="post">
+                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                            <button type="submit" name="add_to_cart" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add to Cart</button>
+                        </form>
+                    </div>
                 </a>
             <?php endwhile; ?>
         </div>
@@ -72,6 +99,6 @@ $result_products = fetchProducts($conn, $category, $subcategory);
 
     <?php include 'footer.php'; ?>
     
-<script src="dropdown.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

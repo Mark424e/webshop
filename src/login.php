@@ -16,19 +16,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $user = $result->fetch_assoc();
             $hashed_password = $user['password'];
 
-            // Verify password
             if (password_verify($password, $hashed_password)) {
-                // Password is correct, set session and redirect
                 $_SESSION['email'] = $email;
                 $_SESSION['role'] = $user['role'];
                 header("Location: index.php");
                 exit();
             } else {
-                // Password is incorrect
                 $error_message = "Invalid email or password";
             }
         } else {
-            // User not found
             $error_message = "Invalid email or password";
         }
 
@@ -68,17 +64,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </form>
     </div>
-
-    <script>
-        // Function to toggle password visibility
-        function togglePasswordVisibility(inputId) {
-            var passwordInput = document.getElementById(inputId);
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-            } else {
-                passwordInput.type = "password";
-            }
-        }
-    </script>
 </body>
 </html>

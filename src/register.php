@@ -2,20 +2,16 @@
 session_start();
 require_once 'config.php';
 
-// Define variables and initialize with empty values
 $name = $phone_number = $address = $email = $password = "";
 $name_err = $phone_number_err = $address_err = $email_err = $password_err = "";
 
-// Processing form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validate name
     if (empty(trim($_POST["name"]))) {
         $name_err = "Please enter your name.";
     } else {
         $name = trim($_POST["name"]);
     }
 
-    // Validate phone number
     if (empty(trim($_POST["phone_number"]))) {
         $phone_number_err = "Please enter your phone number.";
     } elseif (!preg_match("/^\d{8}$/", trim($_POST["phone_number"]))) {
@@ -24,14 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $phone_number = trim($_POST["phone_number"]);
     }
 
-    // Validate address
     if (empty(trim($_POST["address"]))) {
         $address_err = "Please enter your address.";
     } else {
         $address = trim($_POST["address"]);
     }
 
-    // Validate email
     if (empty(trim($_POST["email"]))) {
         $email_err = "Please enter your email.";
     } elseif (!filter_var(trim($_POST["email"]), FILTER_VALIDATE_EMAIL)) {
@@ -40,7 +34,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST["email"]);
     }
 
-    // Validate password
     if (empty(trim($_POST["password"]))) {
         $password_err = "Please enter a password.";
     } elseif (strlen(trim($_POST["password"])) < 6) {
@@ -49,40 +42,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password = trim($_POST["password"]);
     }
 
-    // Check input errors before inserting into database
     if (empty($name_err) && empty($phone_number_err) && empty($address_err) && empty($email_err) && empty($password_err)) {
-        // Hash the password
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-        // Prepare an insert statement
         $sql = "INSERT INTO users (name, phone_number, address, email, password) VALUES (?, ?, ?, ?, ?)";
 
         if ($stmt = $conn->prepare($sql)) {
-            // Bind variables to the prepared statement as parameters
             $stmt->bind_param("sssss", $param_name, $param_phone_number, $param_address, $param_email, $param_password);
 
-            // Set parameters
             $param_name = $name;
             $param_phone_number = $phone_number;
             $param_address = $address;
             $param_email = $email;
             $param_password = $password_hash;
 
-            // Attempt to execute the prepared statement
             if ($stmt->execute()) {
-                // Redirect to login page
                 header("location: login.php");
                 exit();
             } else {
                 echo "Something went wrong. Please try again later.";
             }
 
-            // Close statement
             $stmt->close();
         }
     }
 
-    // Close connection
     $conn->close();
 }
 ?>
