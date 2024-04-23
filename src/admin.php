@@ -182,7 +182,7 @@ $result_products = fetchProducts($conn, $category, $subcategory);
                 <input type="file" id="image" name="image" accept="image/*" class="border rounded w-full py-2 px-3">
                 <span class="text-red-500"><?php echo $image_url_err; ?></span>
             </div>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add Product</button>
+            <button type="submit" class="bg-blue-800 hover:bg-blue-950 text-white font-bold py-2 px-4 rounded">Add Product</button>
         </form>
     </div>
 
@@ -197,7 +197,7 @@ $result_products = fetchProducts($conn, $category, $subcategory);
                         <p class="text-gray-700 font-semibold">$<?php echo $product['price']; ?></p>
                     </div>
                     <div class="flex justify-center">
-                        <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 w-20 text-center">Edit</a>
+                        <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="bg-blue-800 hover:bg-blue-950 text-white font-bold py-2 px-4 rounded mr-2 w-20 text-center">Edit</a>
                         <a href="admin.php?id=<?php echo $product['id']; ?>" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-20 text-center" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
                     </div>
                 </div>

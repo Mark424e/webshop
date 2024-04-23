@@ -1,13 +1,11 @@
-
-
 <header class="bg-gradient-to-tr from-blue-950 via-blue-800 to-cyan-500 top-0 p-4 fixed w-full">
   <nav>
     <div class="container mx-auto flex justify-between items-center">
       <div class="flex items-center gap-4">
         <h1 class="text-white text-2xl"><a href="./">Fishsticks</a></h1>
       
-        <div class="relative">
-          <button id="dropdown" class=" text-white py-2 px-4 rounded inline-flex items-center">
+        <div class="relative mx-6">
+          <button id="dropdown" class=" text-white rounded inline-flex items-center">
             <span>Products</span>
             <svg class="fill-current w-4 h-4 ml-2" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 14l-7-7h14l-7 7z"/>
@@ -35,17 +33,20 @@
         </div>
       </div>
 
-      <div>
-      <a href="index.php" class="text-white mx-2">Home</a>
-        <?php if (isset($_SESSION['email'])): ?>
-      <a href="logout.php" class="text-white mx-2">Logout</a>
-        <?php else: ?>
-      <a href="login.php" class="text-white mx-2">Login</a>
-      <a href="register.php" class="text-white mx-2">Register</a>
-        <?php endif; ?>
-        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-      <a href="admin.php" class="text-white mx-2">Admin</a>
-        <?php endif; ?>
+      <div class="flex">
+        <a href="index.php" class="text-white mx-2">Home</a>
+          <?php if (isset($_SESSION['email'])): ?>
+        <a href="logout.php" class="text-white mx-2">Logout</a>
+          <?php else: ?>
+        <a href="login.php" class="text-white mx-2">Login</a>
+        <a href="register.php" class="text-white mx-2">Register</a>
+          <?php endif; ?>
+          <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <a href="admin.php" class="text-white mx-2">Admin</a>
+          <?php endif; ?>
+        <a href="cart.php" class="text-white ms-8 me-2">
+          <img src="./assets/images/cart-shopping-solid.svg" class="min-w-7"/>
+        </a>
       </div>
     </div>
   </nav>

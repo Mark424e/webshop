@@ -2,11 +2,6 @@
 session_start();
 require_once 'config.php';
 
-$query_categories = "SELECT DISTINCT category FROM products";
-$result_categories = mysqli_query($conn, $query_categories);
-$query_subcategories = "SELECT DISTINCT subcategory FROM products";
-$result_subcategories = mysqli_query($conn, $query_subcategories);
-
 function addToCart($conn, $productId) {
     $sql = "INSERT INTO cart (product_id) VALUES (?)";
     if ($stmt = $conn->prepare($sql)) {
@@ -31,22 +26,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_to_cart']) && isse
     }
 }
 
-function fetchProducts($conn, $category = null, $subcategory = null) {
-    $query = "SELECT * FROM products";
-    if ($category && $subcategory) {
-        $query .= " WHERE category='$category' AND subcategory='$subcategory'";
-    } elseif ($category) {
-        $query .= " WHERE category='$category'";
-    } elseif ($subcategory) {
-        $query .= " WHERE subcategory='$subcategory'";
-    }
-    $result = mysqli_query($conn, $query);
-    return $result;
-}
+$query_categories = "SELECT DISTINCT category FROM products";
+$result_categories = mysqli_query($conn, $query_categories);
+$query_subcategories = "SELECT DISTINCT subcategory FROM products";
+$result_subcategories = mysqli_query($conn, $query_subcategories);
 
 $category = $_GET['category'] ?? null;
 $subcategory = $_GET['subcategory'] ?? null;
 $result_products = fetchProducts($conn, $category, $subcategory);
+
+function fetchProducts($conn, $category = null, $subcategory = null) {
+  $query = "SELECT * FROM products";
+  if ($category && $subcategory) {
+      $query .= " WHERE category='$category' AND subcategory='$subcategory'";
+  } elseif ($category) {
+      $query .= " WHERE category='$category'";
+  } elseif ($subcategory) {
+      $query .= " WHERE subcategory='$subcategory'";
+  }
+  $result = mysqli_query($conn, $query);
+  return $result;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -63,8 +64,6 @@ $result_products = fetchProducts($conn, $category, $subcategory);
 <body class="bg-gray-100">
     
     <?php include 'header.php'; ?>
-
-    <div id="toast" class="hidden">Product added to cart!</div>
 
     <div id="hero" class="bg-cover bg-center py-40 mb-16">
         <div class="container mx-auto px-4 mt-20">
@@ -89,7 +88,7 @@ $result_products = fetchProducts($conn, $category, $subcategory);
                     <div class="flex justify-center">
                         <form method="post">
                             <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                            <button type="submit" name="add_to_cart" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add to Cart</button>
+                            <button type="submit" name="add_to_cart" class="bg-blue-800 hover:bg-blue-950 text-white font-bold py-2 px-4 rounded">Add to Cart</button>
                         </form>
                     </div>
                 </a>

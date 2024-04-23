@@ -30,6 +30,30 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     exit();
 }
 
+function addToCart($conn, $productId) {
+    $sql = "INSERT INTO cart (product_id) VALUES (?)";
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("i", $productId);
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_to_cart']) && isset($_POST['product_id'])) {
+    $product_id = $_POST['product_id'];
+
+    if (addToCart($conn, $product_id)) {
+        echo "<script>alert('Product added to cart!');</script>";
+    } else {
+        echo "<script>alert('Error adding product to cart.');</script>";
+    }
+}
+
 $conn->close();
 ?>
 
@@ -50,17 +74,20 @@ $conn->close();
                 <div class="flex items-center gap-4">
                     <h1 class="text-white text-2xl"><a href="./">Fishsticks</a></h1>   
                 </div>
-                <div>
-                <a href="index.php" class="text-white mx-2">Home</a>
-                    <?php if (isset($_SESSION['email'])): ?>
-                <a href="logout.php" class="text-white mx-2">Logout</a>
-                    <?php else: ?>
-                <a href="login.php" class="text-white mx-2">Login</a>
-                <a href="register.php" class="text-white mx-2">Register</a>
-                    <?php endif; ?>
-                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                <a href="admin.php" class="text-white mx-2">Admin</a>
-                    <?php endif; ?>
+                <div class="flex">
+                    <a href="index.php" class="text-white mx-2">Home</a>
+                        <?php if (isset($_SESSION['email'])): ?>
+                    <a href="logout.php" class="text-white mx-2">Logout</a>
+                        <?php else: ?>
+                    <a href="login.php" class="text-white mx-2">Login</a>
+                    <a href="register.php" class="text-white mx-2">Register</a>
+                        <?php endif; ?>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                    <a href="admin.php" class="text-white mx-2">Admin</a>
+                        <?php endif; ?>
+                    <a href="cart.php" class="text-white ms-8 me-2">
+                        <img src="./assets/images/cart-shopping-solid.svg" class="min-w-7"/>
+                    </a>
                 </div>
             </div>
         </nav>
@@ -75,6 +102,10 @@ $conn->close();
                 <h2 class="text-4xl font-semibold mb-2"><?php echo $product['name']; ?></h2>
                 <h2 class="text-2xl font-semibold mb-2">$<?php echo $product['price']; ?></h2>
                 <p class="text-gray-700"><?php echo $product['description']; ?></p>
+                <form method="post">
+                    <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                    <button type="submit" name="add_to_cart" class="bg-blue-800 hover:bg-blue-950 text-white font-bold py-2 px-4 rounded mt-4">Add to Cart</button>
+                </form>
             </div>
         </div>
     </div>
