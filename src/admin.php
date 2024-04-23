@@ -52,15 +52,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $category = trim($_POST["category"]);
     }
 
-    // Check if subcategory is selected
     if (!empty($_POST["subcategory"])) {
-        $subcategory_err = "Please enter the product subcategory.";
-    } else {
         $subcategory = trim($_POST["subcategory"]);
     }
     
     if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
-        // Check if the file is an image
         $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
         $file_info = pathinfo($_FILES["image"]["name"]);
         $file_extension = strtolower($file_info['extension']);
@@ -130,6 +126,33 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     }
 }
 
+// Fetch distinct categories from the products table
+$query_categories = "SELECT DISTINCT category FROM products";
+$result_categories = mysqli_query($conn, $query_categories);
+
+// Fetch distinct subcategories from the products table
+$query_subcategories = "SELECT DISTINCT subcategory FROM products";
+$result_subcategories = mysqli_query($conn, $query_subcategories);
+
+// Function to fetch products based on category and/or subcategory
+function fetchProducts($conn, $category = null, $subcategory = null) {
+    $query = "SELECT * FROM products";
+    if ($category && $subcategory) {
+        $query .= " WHERE category='$category' AND subcategory='$subcategory'";
+    } elseif ($category) {
+        $query .= " WHERE category='$category'";
+    } elseif ($subcategory) {
+        $query .= " WHERE subcategory='$subcategory'";
+    }
+    $result = mysqli_query($conn, $query);
+    return $result;
+}
+
+// Fetch products based on URL parameters
+$category = $_GET['category'] ?? null;
+$subcategory = $_GET['subcategory'] ?? null;
+$result_products = fetchProducts($conn, $category, $subcategory);
+
 ?>
 
 <!DOCTYPE html>
@@ -145,7 +168,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
     <?php include 'header.php'; ?>
 
-    <div class="max-w-md mx-auto p-6 bg-white rounded shadow-md">
+    <div class="max-w-md mx-auto p-6 bg-white rounded shadow-md mt-40">
         <h2 class="text-2xl font-semibold mb-6">Add Product</h2>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
             <div class="mb-4">
@@ -175,10 +198,12 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             </div>
             <div id="subcategoryField" class="mb-4" style="display: none;">
                 <label for="subcategory" class="block text-gray-700 font-bold mb-2">Subcategory:</label>
-                <select id="subcategory" name="subcategory" class="border rounded w-full py-2 px-3 mb-3" required>
+                <select id="subcategory" name="subcategory" class="border rounded w-full py-2 px-3 mb-3">
                     <option value="">Select Subcategory</option>
+                    <!-- Options will be populated dynamically via JavaScript -->
                 </select>
             </div>
+
             <div class="mb-4">
                 <label for="image" class="block text-gray-700 font-bold mb-2">Image:</label>
                 <input type="file" id="image" name="image" accept="image/*" class="border rounded w-full py-2 px-3">
@@ -188,28 +213,30 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         </form>
     </div>
 
-    <div class="container mx-auto mt-10">
+    <div class="container mx-auto p-4">
         <h2 class="text-2xl font-semibold mb-6">Manage Products</h2>
-        <div class="grid grid-cols-3 gap-6">
-            <?php foreach ($products as $product): ?>
-                <div class="bg-white border p-4 rounded shadow-md product-card">
-                    <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="mb-4">
+        <div class="grid grid-cols-4 gap-4">
+            <?php while ($product = mysqli_fetch_assoc($result_products)) : ?>
+                <div class="flex flex-col justify-between bg-white border rounded p-4">
                     <div>
+                        <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="my-4">
                         <h3 class="text-lg font-semibold"><?php echo $product['name']; ?></h3>
-                        <p class="text-gray-600 mb-2">$<?php echo $product['price']; ?></p>
+                        <p class="text-gray-700 font-semibold">$<?php echo $product['price']; ?></p>
                     </div>
                     <div class="flex justify-center">
                         <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 w-20 text-center">Edit</a>
                         <a href="admin.php?id=<?php echo $product['id']; ?>" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-20 text-center" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            <?php endwhile; ?>
         </div>
     </div>
 
     <?php include 'footer.php'; ?>
 
-    <script>
+<script src="dropdown.js"></script>
+<script>
+        // JavaScript code to dynamically populate subcategory dropdown based on selected category
         document.getElementById('category').addEventListener('change', function() {
             var category = this.value;
             var subcategoryField = document.getElementById('subcategoryField');
@@ -224,13 +251,14 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
             // Clear existing options
             subcategoryDropdown.innerHTML = '';
+            // Add default option
             var defaultOption = document.createElement('option');
             defaultOption.text = 'Select Subcategory';
-            defaultOption.value = 'none';
+            defaultOption.value = '';
             subcategoryDropdown.appendChild(defaultOption);
-
+            // Populate subcategory options based on selected category
             if (category === 'clothes') {
-                var clothesSubcategories = ['t-shirt', 'hoodie'];
+                var clothesSubcategories = ['t-shirts', 'hoodies', 'pants', 'dresses'];
                 clothesSubcategories.forEach(function(subcategory) {
                     var option = document.createElement('option');
                     option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1); // Capitalize first letter
@@ -238,7 +266,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                     subcategoryDropdown.appendChild(option);
                 });
             } else if (category === 'jewellery') {
-                var jewellerySubcategories = ['necklace', 'bracelet'];
+                var jewellerySubcategories = ['necklaces', 'earrings', 'bracelets', 'rings'];
                 jewellerySubcategories.forEach(function(subcategory) {
                     var option = document.createElement('option');
                     option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1); // Capitalize first letter
@@ -246,9 +274,9 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                     subcategoryDropdown.appendChild(option);
                 });
             }
+            // Add more conditions for other categories if needed
         });
     </script>
-
 </body>
 </html>
 

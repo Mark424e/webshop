@@ -46,14 +46,38 @@ $conn->close();
 </head>
 <body class="bg-gray-100">
 
-    <?php include 'header.php'; ?>
+    <header class="bg-gradient-to-tr from-blue-950 via-blue-800 to-cyan-500 top-0 p-4 fixed w-full">
+        <nav>
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-white text-2xl"><a href="./">Fishsticks</a></h1>   
+                </div>
+                <div>
+                <a href="index.php" class="text-white mx-2">Home</a>
+                    <?php if (isset($_SESSION['email'])): ?>
+                <a href="logout.php" class="text-white mx-2">Logout</a>
+                    <?php else: ?>
+                <a href="login.php" class="text-white mx-2">Login</a>
+                <a href="register.php" class="text-white mx-2">Register</a>
+                    <?php endif; ?>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <a href="admin.php" class="text-white mx-2">Admin</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-    <div class="container mx-auto mt-10">
-        <div class="border p-4 rounded shadow-md">
-            <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="mb-4">
-            <h2 class="text-2xl font-semibold mb-2"><?php echo $product['name']; ?></h2>
-            <p class="text-gray-600 mb-2">$<?php echo $product['price']; ?></p>
-            <p class="text-gray-700"><?php echo $product['description']; ?></p>
+    <div class="container mx-auto mt-40">
+        <div class="grid grid-cols-2 gap-8">
+            <div>
+                <img src="<?php echo $product['image_url']; ?>" alt="<?php echo $product['name']; ?>" class="mb-4">
+            </div>
+            <div>
+                <h2 class="text-4xl font-semibold mb-2"><?php echo $product['name']; ?></h2>
+                <h2 class="text-2xl font-semibold mb-2">$<?php echo $product['price']; ?></h2>
+                <p class="text-gray-700"><?php echo $product['description']; ?></p>
+            </div>
         </div>
     </div>
 
