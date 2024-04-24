@@ -209,32 +209,27 @@ $result_products = fetchProducts($conn, $category, $subcategory);
 
 <script src="script.js"></script>
 <script>
-        // JavaScript code to dynamically populate subcategory dropdown based on selected category
         document.getElementById('category').addEventListener('change', function() {
             var category = this.value;
             var subcategoryField = document.getElementById('subcategoryField');
             var subcategoryDropdown = document.getElementById('subcategory');
             
-            // Toggle visibility of subcategory field based on selected category
             if (category === 'clothes' || category === 'jewellery') {
                 subcategoryField.style.display = 'block';
             } else {
                 subcategoryField.style.display = 'none';
             }
 
-            // Clear existing options
             subcategoryDropdown.innerHTML = '';
-            // Add default option
             var defaultOption = document.createElement('option');
             defaultOption.text = 'Select Subcategory';
             defaultOption.value = '';
             subcategoryDropdown.appendChild(defaultOption);
-            // Populate subcategory options based on selected category
             if (category === 'clothes') {
                 var clothesSubcategories = ['t-shirts', 'hoodies', 'pants', 'dresses'];
                 clothesSubcategories.forEach(function(subcategory) {
                     var option = document.createElement('option');
-                    option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1); // Capitalize first letter
+                    option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1);
                     option.value = subcategory;
                     subcategoryDropdown.appendChild(option);
                 });
@@ -242,7 +237,7 @@ $result_products = fetchProducts($conn, $category, $subcategory);
                 var jewellerySubcategories = ['necklaces', 'earrings', 'bracelets', 'rings'];
                 jewellerySubcategories.forEach(function(subcategory) {
                     var option = document.createElement('option');
-                    option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1); // Capitalize first letter
+                    option.text = subcategory.charAt(0).toUpperCase() + subcategory.slice(1);
                     option.value = subcategory;
                     subcategoryDropdown.appendChild(option);
                 });

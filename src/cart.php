@@ -2,36 +2,28 @@
 session_start();
 require_once 'config.php';
 
-// Check if the form is submitted for removing a product from the cart
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remove_product'])) {
-    // Validate product ID
     if (isset($_POST["product_id"]) && is_numeric($_POST["product_id"])) {
         $product_id = $_POST["product_id"];
 
-        // Remove one entry of the product from the cart table
         $sql = "DELETE FROM cart WHERE product_id = ? LIMIT 1";
         if ($stmt = $conn->prepare($sql)) {
             $stmt->bind_param("i", $product_id);
             if ($stmt->execute()) {
-                // Product successfully removed from the cart
-                header("Location: cart.php"); // Refresh the page
+                header("Location: cart.php");
                 exit();
             } else {
-                // Error handling
                 echo "Error removing product from cart.";
             }
             $stmt->close();
         } else {
-            // Error handling
             echo "Error preparing statement.";
         }
     } else {
-        // Error handling
         echo "Invalid product ID.";
     }
 }
 
-// Fetch products from the cart table and group them by product_id
 $sql = "SELECT products.*, COUNT(*) AS quantity FROM products INNER JOIN cart ON products.id = cart.product_id GROUP BY products.id";
 $result = $conn->query($sql);
 
